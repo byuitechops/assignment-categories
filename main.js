@@ -57,8 +57,9 @@ module.exports = (course, stepCallback) => {
 	 * 	makeWeightsGroups()				  
 	 *  
 	 **********************************************/
-	function makeWeightsGroups($category) {
+	function makeWeightsGroups($category, makeWeightsGroupCallback) {
 		/* Make an assignment group for each category, with each category's associated name and grade weight */
+		console.log(($category).find('name').html());
 
 		/* Somehow get each category's name and wieght through cheerio.js */
 		/* category>name will give the name of the category and category>scoring>weight will give the category's weight */
@@ -66,9 +67,9 @@ module.exports = (course, stepCallback) => {
 				'name': `Put the category name here`,
 				'group_weight': `Put a number here for the category/ group weight`,
 			},
-			(postErr, group) => {
+			(postErr) => {
 				if (postErr) {
-					makePointsGroupsCallback(postErr);
+					makeWeightsGroupCallback(postErr);
 					return;
 				}
 			});
@@ -79,7 +80,7 @@ module.exports = (course, stepCallback) => {
 	 * 	chooseGradingSystem()				  
 	 *  Parameters: chooseGradingSystemCallback()
 	 **********************************************/
-	function chooseGradingSystem(weeks) {
+	function chooseGradingSystem() {
 		/* Get the contents of 'grades_d2l.xml' */
 		var myFile = course.content.find(file => {
 			return file.name === 'grades_d2l.xml';
@@ -111,7 +112,7 @@ module.exports = (course, stepCallback) => {
 		} else if ($.html() == 1) {
 			console.log(`Grading System: Weights`);
 			/* Put the grade weight categories in an array to traverse through */
-			$categories = myFile.dom(`category`);
+			var $categories = myFile.dom(`category`);
 			/* For each category, create an assignment group */
 			asyncLib.each($categories, makeWeightsGroups,
 				(eachErr) => {
