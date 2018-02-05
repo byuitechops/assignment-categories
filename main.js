@@ -3,8 +3,6 @@
 
 /* Module Description */
 
-/* Put dependencies here */
-
 /* Include this line only if you are going to use Canvas API */
 const canvas = require('canvas-wrapper');
 
@@ -14,11 +12,11 @@ const canvas = require('canvas-wrapper');
 module.exports = (course, stepCallback) => {
 
 	/**********************************************
-	 * 	makeWeightsGroups()				  
-	 *  
+	 * 	makeWeightedGroups()				  
+	 *  Parameters: weights
 	 **********************************************/
-	function useWeightGroups(weights) {
-		/* Make an assignment group for each category, with each category's associated name and grade weight */
+	function useWeightedGroups(weights) {
+		/* Add up all the grade weights and ensure they equal 100% */
 		var weightTotal = 0;
 
 		/* Add up all the grade weights */
@@ -26,12 +24,13 @@ module.exports = (course, stepCallback) => {
 			weightTotal += parseFloat(weight.children[0].data);
 		});
 
-		/* Make sure the grade weights add up to 100% */
+		/* If the weights don't add up to 100%, throw a warning and move on */
 		if (weightTotal !== 100) {
 			course.warning(`\'Grade Weights\' do not add up to 100%, but instead add up to ${weightTotal}%`);
 		}
 
-		/* Tell Canvas to use the imported group weights to calculate the final grade */
+		/* Canvas will automatically import the grade weights, but won't use them. 
+		This PUT request will tell Canvas to use the weights to calculate the final grade */
 		canvas.put(`/api/v1/courses/${course.info.canvasOU}`, {
 				'course': {
 					'apply_assignment_group_weights': true,
@@ -64,14 +63,14 @@ module.exports = (course, stepCallback) => {
 			stepCallback(null, course);
 		}
 
-		/* Use Cheerio.js to parse through myFile to find the grading system (points or weights) */
+		/* Use Cheerio.js to parse through myFile to find the grading system (points (0), weights (1), or based on a custom formula(2)) */
 		var gradingSystem = myFile.dom(`configuration>grading_system`).html();
 
-		/* If the grading system uses grade weights, call makeWeightsGroups() */
+		/* If the grading system uses grade weights, call useWeightedGroups() */
 		if (gradingSystem == 1) {
 			/* Put the grade weight categories in an array to traverse through */
 			var weights = myFile.dom(`category>scoring>weight`);
-			useWeightGroups(weights);
+			useWeightedGroups(weights);
 
 		} else {
 			course.message(`Course does not use a weighted grade book, moving to next child module`);
