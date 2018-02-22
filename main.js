@@ -10,10 +10,11 @@ also check to see if the grade weights add up to 100%, and will throw an error i
 const canvas = require('canvas-wrapper');
 
 module.exports = (course, stepCallback) => {
-	/**********************************************
+	/***************************************************************************
 	 * 	findGradingSystem()				  
 	 *  Parameters: none
-	 **********************************************/
+	 *  Description: Determine which grading system is used in the given course
+	 ***************************************************************************/
 	function findGradingSystem() {
 		/* Get the contents of 'grades_d2l.xml' */
 		var myFile = course.content.find(file => {
@@ -59,10 +60,12 @@ module.exports = (course, stepCallback) => {
 
 
 
-	/**********************************************
+	/************************************************************
 	 * 	makeWeightedGroups()				  
 	 *  Parameters: weights
-	 **********************************************/
+	 *  Description: If the grading system uses weights, 
+	 *  change the setting on Canvas to apply the grade weights
+	 ************************************************************/
 	function useWeightedGroups(weights) {
 		/* Add up all the grade weights and ensure they equal 100% */
 		var weightTotal = 0;
@@ -76,7 +79,6 @@ module.exports = (course, stepCallback) => {
 		if (weightTotal !== 100) {
 			course.warning(`Grade Weights do not add up to 100%, but instead add up to ${weightTotal}%`);
 		}
-
 
 		/* Canvas will automatically import the grade weights, but won't use them. 
 		This PUT request will tell Canvas to use the weights to calculate the final grade */
@@ -99,7 +101,5 @@ module.exports = (course, stepCallback) => {
 	/**********************************************
 	 * 				START HERE					  *
 	 **********************************************/
-	/* Start the child module by finding out which grading system is used */
 	findGradingSystem();
-
 };
