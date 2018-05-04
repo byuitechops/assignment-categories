@@ -25,6 +25,7 @@ module.exports = (course, stepCallback) => {
 		if (!myFile) {
 			course.warning('Couldn\'t locate \'grades_d2l.xml\' for this course.');
 			stepCallback(null, course);
+			return;
 		}
 
 		/* Use Cheerio.js to parse through myFile to find the grading system (points (0), weights (1), or based on a custom formula(2)) */
